@@ -1,5 +1,8 @@
 package com.warchlak.bookmanager;
 
+import android.app.DownloadManager;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -8,9 +11,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
-public class RawDataDownloader extends AsyncTask<String, Void, String>
+public class RawDataDownloader extends AsyncTask<URI, Void, String>
 {
 	private static final String TAG = "RawDataDownloader";
 	
@@ -47,11 +51,12 @@ public class RawDataDownloader extends AsyncTask<String, Void, String>
 	}
 	
 	@Override
-	protected String doInBackground(String... strings)
+	protected String doInBackground(URI... uris)
 	{
-		String uriString = strings[0];
+		Log.d(TAG, "doInBackground: start");
 		
-		if (uriString == null)
+		URI uri = uris[0];
+		if (uri == null)
 		{
 			downloadStatus = DownloadStatus.NOT_INITIALIZED;
 			return null;
@@ -62,9 +67,18 @@ public class RawDataDownloader extends AsyncTask<String, Void, String>
 		
 		try
 		{
-			URL url = new URL(uriString);
+			URL url = new URL(uri.toString());
 			connection = (HttpURLConnection) url.openConnection();
 			
+			Log.d(TAG, "doInBackground: connecting");
+			
+			Log.d(TAG, "doInBackground: responseCode is " + connection.getResponseCode());
+			if (connection.getResponseCode() != HttpURLConnection.HTTP_OK)
+			{
+				Log.e(TAG, "doInBackground: ERROR: response code is: " + connection.getResponseCode());
+				return null;
+			}
+			Log.d(TAG, "doInBackground: after response code");
 			bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			
 			StringBuilder stringBuilder = new StringBuilder();
@@ -84,7 +98,7 @@ public class RawDataDownloader extends AsyncTask<String, Void, String>
 			
 		} catch (MalformedURLException e)
 		{
-			Log.e(TAG, "doInBackground: uri: " + uriString + " is invalid");
+			Log.e(TAG, "doInBackground: uri: " + uri.toString() + " is invalid");
 		} catch (IOException e)
 		{
 			Log.e(TAG, "doInBackground: Cannot open connection: " + e.getMessage());
@@ -109,6 +123,7 @@ public class RawDataDownloader extends AsyncTask<String, Void, String>
 			}
 		}
 		
+		Log.d(TAG, "doInBackground: ends");
 		downloadStatus = DownloadStatus.ERROR;
 		return null;
 	}

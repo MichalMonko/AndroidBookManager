@@ -1,5 +1,6 @@
 package com.warchlak.bookmanager;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,11 +11,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements RawDataDownloader.DownloadCompleteListener
+import com.warchlak.bookmanager.entity.Book;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements JsonDataParser.ParsingCompleteListener
 {
 	private static final String TAG = "MainActivity";
-	public static final String DOWNLOAD_RESOURCE_LOCATION = "http://77.254.184.154:8081/api/book";
+	public static final String BASE_URL = "http://77.254.184.154:8081/api/book";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -24,9 +32,19 @@ public class MainActivity extends AppCompatActivity implements RawDataDownloader
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		
-		RawDataDownloader rawDataDownloader = new RawDataDownloader(this);
-		rawDataDownloader.execute(DOWNLOAD_RESOURCE_LOCATION);
+		URI uri = null;
 		
+		try
+		{
+			uri = new URI(BASE_URL);
+		} catch (URISyntaxException e)
+		{
+			Log.e(TAG, "onCreate: invalid URI: " + BASE_URL);
+		}
+		
+		JsonDataParser jsonParser = new JsonDataParser(uri, this);
+
+
 //		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //		fab.setOnClickListener(new View.OnClickListener()
 //		{
@@ -40,21 +58,12 @@ public class MainActivity extends AppCompatActivity implements RawDataDownloader
 	}
 	
 	@Override
-	public void onDownloadComplete(String downloadedData, RawDataDownloader.DownloadStatus downloadStatus)
+	public void onParsingComplete(List<Book> parsedData, JsonDataParser.ParsingStatus status)
 	{
-		Log.d(TAG, "onDownloadComplete: started");
-		
-		if (downloadStatus == RawDataDownloader.DownloadStatus.OK)
+		for (Book book : parsedData)
 		{
-			Log.d(TAG, "onDownloadComplete: \n\ndownloaded Data: " + downloadedData + "\n\n");
-			TextView textView = findViewById(R.id.initialTextView);
-			textView.setText(downloadedData);
+			Toast.makeText(this, book.toString(), Toast.LENGTH_LONG).show();
 		}
-		else
-		{
-			Log.e(TAG, "onDownloadComplete: downloading failed with status: " + downloadStatus.name());
-		}
-		
 	}
 	
 	@Override
