@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">BookManager</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_add_new">AddNewActivity</string>
+    <string name="bookImageDesc">book,cover,image</string>
+    <string name="photoLoadingError">Cannot load selected photo</string>
+    <string name="title">Title</string>
+    <string name="tags" >Tags</string>
+    <string name="description" >Description</string>
 </resources>

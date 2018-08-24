@@ -1,5 +1,6 @@
 package com.warchlak.bookmanager;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,6 +11,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,17 +35,17 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		
-		URI uri = null;
-		
-		try
-		{
-			uri = new URI(BASE_URL);
-		} catch (URISyntaxException e)
-		{
-			Log.e(TAG, "onCreate: invalid URI: " + BASE_URL);
-		}
-		
-		JsonDataParser jsonParser = new JsonDataParser(uri, this);
+//		URI uri = null;
+//
+//		try
+//		{
+//			uri = new URI(BASE_URL);
+//		} catch (URISyntaxException e)
+//		{
+//			Log.e(TAG, "onCreate: invalid URI: " + BASE_URL);
+//		}
+//
+//		JsonDataParser jsonParser = new JsonDataParser(uri, this);
 
 
 //		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -82,13 +85,20 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		
-		//noinspection SimplifiableIfStatement
-		if (id == R.id.action_settings)
+		switch (id)
 		{
-			return true;
+			case R.id.menuAddNewBook:
+				runNewBookActivity();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
-		
-		return super.onOptionsItemSelected(item);
+	}
+	
+	private void runNewBookActivity()
+	{
+		Intent intent = new Intent(this, AddNewActivity.class);
+		startActivity(intent);
 	}
 }
 
