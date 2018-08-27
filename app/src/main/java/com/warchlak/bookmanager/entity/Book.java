@@ -8,6 +8,10 @@ public class Book
 	private double price;
 	private String imageLink;
 	
+	public Book()
+	{
+	}
+	
 	public Book(String title, String description, String tags, double price, String imageLink)
 	{
 		this.title = title;

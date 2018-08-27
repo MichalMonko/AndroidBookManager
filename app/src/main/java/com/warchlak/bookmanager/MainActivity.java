@@ -3,29 +3,24 @@ package com.warchlak.bookmanager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 import com.warchlak.bookmanager.entity.Book;
+import com.warchlak.bookmanager.util.BookRestApiUriHolder;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements JsonDataParser.ParsingCompleteListener
 {
 	private static final String TAG = "MainActivity";
-	public static final String BASE_URL = "http://77.254.184.154:8081/api/book";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -35,29 +30,26 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		
-//		URI uri = null;
-//
-//		try
-//		{
-//			uri = new URI(BASE_URL);
-//		} catch (URISyntaxException e)
-//		{
-//			Log.e(TAG, "onCreate: invalid URI: " + BASE_URL);
-//		}
-//
-//		JsonDataParser jsonParser = new JsonDataParser(uri, this);
-
-
-//		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//		fab.setOnClickListener(new View.OnClickListener()
-//		{
-//			@Override
-//			public void onClick(View view)
-//			{
-//				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//				        .setAction("Action", null).show();
-//			}
-//		});
+		ImageView imageView = findViewById(R.id.placeholderImage);
+		Picasso.get()
+		       .load(Uri.parse(BookRestApiUriHolder.BASE_IMAGE_URL + "ee954570-99b6-4413-b03d-084c57512fbe.png"))
+		       .placeholder(R.drawable.image_placeholder_icon)
+		       .error(R.drawable.broken_image)
+		       .into(imageView, new Callback()
+		       {
+			       @Override
+			       public void onSuccess()
+			       {
+				
+			       }
+			
+			       @Override
+			       public void onError(Exception e)
+			       {
+				       Log.e(TAG, "onError: " + e.getMessage());
+				       e.printStackTrace();
+			       }
+		       });
 	}
 	
 	@Override

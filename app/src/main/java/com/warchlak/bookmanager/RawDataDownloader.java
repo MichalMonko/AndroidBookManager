@@ -1,8 +1,5 @@
 package com.warchlak.bookmanager;
 
-import android.app.DownloadManager;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -31,7 +28,7 @@ public class RawDataDownloader extends AsyncTask<URI, Void, String>
 		void onDownloadComplete(String downloadedData, DownloadStatus downloadStatus);
 	}
 	
-	public RawDataDownloader(DownloadCompleteListener downloadListener)
+	RawDataDownloader(DownloadCompleteListener downloadListener)
 	{
 		this.downloadListener = downloadListener;
 		this.downloadStatus = DownloadStatus.IDLE;
@@ -53,7 +50,7 @@ public class RawDataDownloader extends AsyncTask<URI, Void, String>
 	@Override
 	protected String doInBackground(URI... uris)
 	{
-		Log.d(TAG, "doInBackground: start");
+		Log.d(TAG, "doInBackground: start with uri: " + uris[0]);
 		
 		URI uri = uris[0];
 		if (uri == null)
