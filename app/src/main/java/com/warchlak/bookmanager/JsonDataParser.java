@@ -47,13 +47,14 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 		if (downloadStatus == RawDataDownloader.DownloadStatus.OK)
 		{
 			
-			Log.d(TAG, "onDownloadComplete: started parsing data: " + "\n\n" +  downloadedData + "\n\n");
+			Log.d(TAG, "onDownloadComplete: started parsing data: " + "\n\n" + downloadedData + "\n\n");
 			
 			try
 			{
 				books = new ArrayList<>();
 				
-				JSONArray jsonArray = new JSONArray(downloadedData);
+				JSONObject jsonResponse = new JSONObject(downloadedData);
+				JSONArray jsonArray = jsonResponse.getJSONArray("content");
 				
 				for (int i = 0; i < jsonArray.length(); i++)
 				{
@@ -61,12 +62,29 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 					
 					String title = jsonObject.getString("title");
 					String description = jsonObject.getString("description");
-					String tags = jsonObject.getString("tags");
 					double price = jsonObject.getDouble("price");
 					String imageLink = jsonObject.getString("imageLink");
 					
+					JSONArray jsonTags = jsonObject.getJSONArray("tags");
 					
-					Book book = new Book(title, description, tags, price, imageLink);
+					boolean isFirstIteration = true;
+					
+					StringBuilder tagsBuilder = new StringBuilder();
+					for (int j = 0; j < jsonTags.length(); j++)
+					{
+						if (!isFirstIteration)
+						{
+							tagsBuilder.append(", ");
+						}
+						
+						String tag = jsonTags.getString(j);
+						tagsBuilder.append("#");
+						tagsBuilder.append(tag);
+						
+						isFirstIteration = false;
+					}
+					
+					Book book = new Book(title, description, tagsBuilder.toString(), price, imageLink);
 					Log.d(TAG, "onDownloadComplete: parsed book: " + book.toString());
 					books.add(book);
 				}

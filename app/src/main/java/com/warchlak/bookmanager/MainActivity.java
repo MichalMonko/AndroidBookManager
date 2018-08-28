@@ -9,7 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -50,14 +50,23 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 				       e.printStackTrace();
 			       }
 		       });
+		
+		JsonDataParser jsonDataParser = new JsonDataParser(BookRestApiUriHolder.buildPageUri(0, 20, null,
+				BookRestApiUriHolder.TagSearchMethod.ANY), this);
 	}
 	
 	@Override
 	public void onParsingComplete(List<Book> parsedData, JsonDataParser.ParsingStatus status)
 	{
-		for (Book book : parsedData)
+		if (status == JsonDataParser.ParsingStatus.OK)
 		{
-			Toast.makeText(this, book.toString(), Toast.LENGTH_LONG).show();
+			for (Book book : parsedData)
+			{
+//			Toast.makeText(this, book.toString(), Toast.LENGTH_LONG).show();
+				TextView textView = findViewById(R.id.restResult);
+				Log.d(TAG, "onParsingComplete: *******************\n\n BOOK: " + book.toString());
+				textView.setText(parsedData.toString());
+			}
 		}
 	}
 	
