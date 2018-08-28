@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="usePages"
+        android:summary="Switch on to provide information about pages"
+        android:title="Data in pages" />
+    <EditTextPreference
+        android:defaultValue="10"
+        android:key="pageSize"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="Select maximum size of downloaded page"
+        android:title="Page size" />
+</PreferenceScreen>

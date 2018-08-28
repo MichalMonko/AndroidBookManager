@@ -41,14 +41,9 @@ public class BookViewRecyclerAdapter extends RecyclerView.Adapter<BookViewRecycl
 		}
 	}
 	
-	public BookViewRecyclerAdapter()
+	 BookViewRecyclerAdapter()
 	{
 		this.booksData = new ArrayList<>();
-	}
-	
-	public BookViewRecyclerAdapter(List<Book> booksData)
-	{
-		this.booksData = booksData;
 	}
 	
 	@NonNull
