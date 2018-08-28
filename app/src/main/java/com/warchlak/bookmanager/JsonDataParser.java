@@ -19,17 +19,22 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 	private List<Book> books = null;
 	private ParsingCompleteListener callbackReceiver;
 	private ParsingStatus status;
+	private URI resourceUri;
 	
 	enum ParsingStatus
 	{
 		OK, IDLE, PARSING, NOT_INITIALIZED, JSON_ERROR, FAILED_OR_EMPTY
 	}
 	
-	public JsonDataParser(URI resourceUri, ParsingCompleteListener callbackReceiver)
+	JsonDataParser(URI resourceUri, ParsingCompleteListener callbackReceiver)
 	{
 		this.callbackReceiver = callbackReceiver;
 		this.status = ParsingStatus.IDLE;
-		
+		this.resourceUri = resourceUri;
+	}
+	
+	public void start()
+	{
 		RawDataDownloader rawDataDownloader = new RawDataDownloader(this);
 		rawDataDownloader.execute(resourceUri);
 	}

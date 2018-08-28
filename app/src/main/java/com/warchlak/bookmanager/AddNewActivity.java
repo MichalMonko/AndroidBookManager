@@ -148,6 +148,7 @@ public class AddNewActivity extends AppCompatActivity implements Response.Listen
 		else
 		{
 			Toast.makeText(this, "Book uploaded", Toast.LENGTH_LONG).show();
+			finish();
 		}
 	}
 }

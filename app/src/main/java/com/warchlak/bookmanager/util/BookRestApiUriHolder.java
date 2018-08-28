@@ -14,6 +14,20 @@ public class BookRestApiUriHolder
 	public static final String BASE_IMAGE_URL = "http://192.168.1.234:8081/api/images/";
 	public static final String FILE_PARAM_NAME = "file";
 	
+	public static Uri buildPhotoUri(String imageName)
+	{
+		Log.d(TAG, "buildPhotoUri: start");
+		
+		Uri uri = Uri.parse(BASE_IMAGE_URL)
+		             .buildUpon()
+		             .appendPath(imageName)
+		             .build();
+		
+		Log.d(TAG, "buildPhotoUri: returning URI: " + uri.toString());
+		
+		return uri;
+	}
+	
 	public static class TagSearchMethod
 	{
 		public static final String ANY = "any";

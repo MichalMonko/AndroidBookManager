@@ -1,18 +1,16 @@
 package com.warchlak.bookmanager;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.View;
 
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 import com.warchlak.bookmanager.entity.Book;
 import com.warchlak.bookmanager.util.BookRestApiUriHolder;
 
@@ -21,6 +19,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements JsonDataParser.ParsingCompleteListener
 {
 	private static final String TAG = "MainActivity";
+	private BookViewRecyclerAdapter recyclerAdapter = new BookViewRecyclerAdapter();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -30,29 +29,13 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		
-		ImageView imageView = findViewById(R.id.placeholderImage);
-		Picasso.get()
-		       .load(Uri.parse(BookRestApiUriHolder.BASE_IMAGE_URL + "ee954570-99b6-4413-b03d-084c57512fbe.png"))
-		       .placeholder(R.drawable.image_placeholder_icon)
-		       .error(R.drawable.broken_image)
-		       .into(imageView, new Callback()
-		       {
-			       @Override
-			       public void onSuccess()
-			       {
-				
-			       }
-			
-			       @Override
-			       public void onError(Exception e)
-			       {
-				       Log.e(TAG, "onError: " + e.getMessage());
-				       e.printStackTrace();
-			       }
-		       });
+		RecyclerView recyclerView = findViewById(R.id.booksRecyclerView);
+		recyclerView.setLayoutManager(new LinearLayoutManager(this));
+		recyclerView.setAdapter(recyclerAdapter);
 		
 		JsonDataParser jsonDataParser = new JsonDataParser(BookRestApiUriHolder.buildPageUri(0, 20, null,
 				BookRestApiUriHolder.TagSearchMethod.ANY), this);
+		jsonDataParser.start();
 	}
 	
 	@Override
@@ -60,13 +43,18 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 	{
 		if (status == JsonDataParser.ParsingStatus.OK)
 		{
-			for (Book book : parsedData)
-			{
-//			Toast.makeText(this, book.toString(), Toast.LENGTH_LONG).show();
-				TextView textView = findViewById(R.id.restResult);
-				Log.d(TAG, "onParsingComplete: *******************\n\n BOOK: " + book.toString());
-				textView.setText(parsedData.toString());
-			}
+//			for (Book book : parsedData)
+//			{
+//				TextView textView = findViewById(R.id.restResult);
+//				Log.d(TAG, "onParsingComplete: *******************\n\n BOOK: " + book.toString());
+//				textView.setText(parsedData.toString());
+//			}
+			recyclerAdapter.changeDataSet(parsedData);
+		}
+		else
+		{
+			View rootView = findViewById(R.id.mainRootLayout);
+			Snackbar.make(rootView, R.string.dataLoadingError, Snackbar.LENGTH_INDEFINITE).show();
 		}
 	}
 	
