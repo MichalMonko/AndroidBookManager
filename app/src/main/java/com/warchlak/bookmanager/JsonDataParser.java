@@ -21,9 +21,14 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 	private ParsingStatus status;
 	private URI resourceUri;
 	
+	public void setUri(URI uri)
+	{
+		resourceUri = uri;
+	}
+	
 	enum ParsingStatus
 	{
-		OK, IDLE, PARSING, NOT_INITIALIZED, JSON_ERROR, FAILED_OR_EMPTY
+		OK, IDLE, PARSING, NOT_INITIALIZED, JSON_ERROR, TIMEOUT, FAILED_OR_EMPTY
 	}
 	
 	JsonDataParser(URI resourceUri, ParsingCompleteListener callbackReceiver)
@@ -108,6 +113,10 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 				Log.e(TAG, "onDownloadComplete: error during data parsing: " + e.getLocalizedMessage());
 				status = ParsingStatus.FAILED_OR_EMPTY;
 			}
+		}
+		else if (downloadStatus == RawDataDownloader.DownloadStatus.TIMEOUT)
+		{
+			status = ParsingStatus.TIMEOUT;
 		}
 		else
 		{

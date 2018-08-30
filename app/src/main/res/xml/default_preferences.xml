@@ -6,10 +6,18 @@
         android:summary="Switch on to provide information about pages"
         android:title="Data in pages" />
     <EditTextPreference
+        android:id="@+id/pageSizePreference"
         android:defaultValue="10"
+        android:digits="0123456789"
+        android:inputType="phone"
         android:key="pageSize"
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:summary="Select maximum size of downloaded page"
         android:title="Page size" />
+    <android.support.v7.preference.SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="lookup_method"
+        android:summary="Defines if books needs to match all tags, or any of them"
+        android:title="Lookup method (ALL/ANY)" />
 </PreferenceScreen>

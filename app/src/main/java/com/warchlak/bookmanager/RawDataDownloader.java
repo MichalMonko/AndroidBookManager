@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URL;
 
@@ -17,10 +18,11 @@ public class RawDataDownloader extends AsyncTask<URI, Void, String>
 	
 	private DownloadStatus downloadStatus;
 	private DownloadCompleteListener downloadListener;
+	private static final int CONNECTION_TIMEOUT = 2000;
 	
 	enum DownloadStatus
 	{
-		IDLE, NOT_INITIALIZED, DOWNLOADING, OK, ERROR
+		IDLE, NOT_INITIALIZED, DOWNLOADING, OK, ERROR, TIMEOUT
 	}
 	
 	public interface DownloadCompleteListener
@@ -66,7 +68,7 @@ public class RawDataDownloader extends AsyncTask<URI, Void, String>
 		{
 			URL url = new URL(uri.toString());
 			connection = (HttpURLConnection) url.openConnection();
-			
+			connection.setConnectTimeout(CONNECTION_TIMEOUT);
 			Log.d(TAG, "doInBackground: connecting");
 			
 			Log.d(TAG, "doInBackground: responseCode is " + connection.getResponseCode());
@@ -92,15 +94,21 @@ public class RawDataDownloader extends AsyncTask<URI, Void, String>
 			
 			return stringBuilder.toString();
 			
-			
+		} catch (SocketTimeoutException e)
+		{
+			downloadStatus = DownloadStatus.TIMEOUT;
+			Log.e(TAG, "doInBackground: connection timeout of: " + CONNECTION_TIMEOUT + " expired");
 		} catch (MalformedURLException e)
 		{
+			downloadStatus = DownloadStatus.ERROR;
 			Log.e(TAG, "doInBackground: uri: " + uri.toString() + " is invalid");
 		} catch (IOException e)
 		{
+			downloadStatus = DownloadStatus.ERROR;
 			Log.e(TAG, "doInBackground: Cannot open connection: " + e.getMessage());
 		} catch (SecurityException e)
 		{
+			downloadStatus = DownloadStatus.ERROR;
 			Log.e(TAG, "doInBackground: Permission needed: " + e.getMessage());
 		} finally
 		{
@@ -121,7 +129,6 @@ public class RawDataDownloader extends AsyncTask<URI, Void, String>
 		}
 		
 		Log.d(TAG, "doInBackground: ends");
-		downloadStatus = DownloadStatus.ERROR;
 		return null;
 	}
 }

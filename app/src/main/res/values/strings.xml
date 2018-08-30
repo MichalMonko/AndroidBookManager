@@ -11,4 +11,10 @@
     <string name="dataLoadingError">Error during book data downloading, check your internet connection</string>
     <string name="dolarPrice">%1$s\\$</string>
     <string name="empty_search_result">Sorry, no result to show, check your internet connection or provide different search criteria</string>
+    <string name="invalid_last_uri">It seems URL was invalid when app was last used, please search for data to start downloading</string>
+    <string name="invalid_page_size">Invalid value for page size, default value of 10 will be used.</string>
+    <string name="server_timeout"> Error during books data downloading: Cannot connect to the
+        server within given time, try again later</string>
+    <string name="search_hint">Search for books using tags</string>
+    <string name="title_activity_search">SearchActivity</string>
 </resources>
