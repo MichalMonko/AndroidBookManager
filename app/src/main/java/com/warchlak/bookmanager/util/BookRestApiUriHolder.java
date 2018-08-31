@@ -15,7 +15,7 @@ public class BookRestApiUriHolder
 	public static final String FILE_PARAM_NAME = "file";
 	public static final String DEFAULT_URI_STRING = "http://192.168.1.234:8081/api/book/?pageNumber=0&pageSize=10&lookupMethod=all";
 	
-	public static String lastUsedUri;
+	public static String lastUsedUri = DEFAULT_URI_STRING;
 	
 	public static Uri buildPhotoUri(String imageName)
 	{

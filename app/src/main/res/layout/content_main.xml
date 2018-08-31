@@ -29,7 +29,7 @@
 
     <TextView
         android:id="@+id/emptyResultTextView"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
         android:layout_marginBottom="32dp"

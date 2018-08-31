@@ -73,12 +73,14 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 	@Override
 	public void onParsingComplete(List<Book> parsedData, JsonDataParser.ParsingStatus status)
 	{
+		Log.d(TAG, "onParsingComplete: parsed data contains: " + parsedData.size() + " books");
 		if (parsedData == null || parsedData.size() <= 0)
 		{
+			Log.d(TAG, "onParsingComplete: showing empty warning");
 			recyclerView.setVisibility(View.GONE);
 			emptyResultTextView.setVisibility(View.VISIBLE);
 		}
-		if (status == JsonDataParser.ParsingStatus.OK)
+		else if (status == JsonDataParser.ParsingStatus.OK)
 		{
 			emptyResultTextView.setVisibility(View.GONE);
 			recyclerView.setVisibility(View.VISIBLE);
@@ -133,6 +135,33 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 				boolean searchRequested = onSearchRequested();
 				Log.d(TAG, "onOptionsItemSelected: onSearchRequested: " + searchRequested);
 				return true;
+			
+			case R.id.menuHomePage:
+				SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+				sharedPreferences.edit().putString(LAST_URI_KEY, BookRestApiUriHolder.DEFAULT_URI_STRING).apply();
+				BookRestApiUriHolder.lastUsedUri = BookRestApiUriHolder.DEFAULT_URI_STRING;
+				
+				try
+				{
+					jsonDataParser.setUri(new URI(BookRestApiUriHolder.DEFAULT_URI_STRING));
+					jsonDataParser.start();
+				} catch (URISyntaxException e)
+				{
+					Log.e(TAG, "onOptionsItemSelected: default URI is invalid: " + e.getMessage());
+				}
+				return true;
+			
+			case R.id.menuRefreshButton:
+				try
+				{
+					jsonDataParser.setUri(new URI(BookRestApiUriHolder.lastUsedUri));
+					jsonDataParser.start();
+				} catch (URISyntaxException e)
+				{
+					Log.e(TAG, "onOptionsItemSelected: cannot refres data, URI: " + BookRestApiUriHolder.lastUsedUri + " is invalid");
+				}
+				return true;
+			
 			default:
 				return super.onOptionsItemSelected(item);
 		}

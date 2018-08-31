@@ -19,4 +19,14 @@
         android:icon="@drawable/baseline_search_black_24dp"
         android:title="Search"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/menuRefreshButton"
+        android:icon="@drawable/baseline_refresh_black_24"
+        android:title="Refresh"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menuHomePage"
+        android:icon="@drawable/baseline_home_black_24"
+        android:title="Home page"
+        app:showAsAction="ifRoom" />
 </menu>
