@@ -3,6 +3,7 @@ package com.warchlak.bookmanager;
 import android.util.Log;
 
 import com.warchlak.bookmanager.entity.Book;
+import com.warchlak.bookmanager.entity.Page;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,7 +17,7 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 {
 	private static final String TAG = "JsonDataParser";
 	
-	private List<Book> books = null;
+	private Page page = null;
 	private ParsingCompleteListener callbackReceiver;
 	private ParsingStatus status;
 	private URI resourceUri;
@@ -46,7 +47,7 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 	
 	public interface ParsingCompleteListener
 	{
-		void onParsingComplete(List<Book> parsedData, ParsingStatus status);
+		void onParsingComplete(Page page, ParsingStatus status);
 	}
 	
 	@Override
@@ -61,9 +62,13 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 			
 			try
 			{
-				books = new ArrayList<>();
+				List<Book> books = new ArrayList<>();
 				
 				JSONObject jsonResponse = new JSONObject(downloadedData);
+				
+				int pageNumber = jsonResponse.getInt("number");
+				int pagesTotal = jsonResponse.getInt("totalPages");
+				
 				JSONArray jsonArray = jsonResponse.getJSONArray("content");
 				
 				for (int i = 0; i < jsonArray.length(); i++)
@@ -101,6 +106,7 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 				
 				Log.d(TAG, "onDownloadComplete: parsing ended");
 				
+				page = new Page(pageNumber, pagesTotal, books);
 				status = ParsingStatus.OK;
 				
 				
@@ -125,7 +131,7 @@ public class JsonDataParser implements RawDataDownloader.DownloadCompleteListene
 		
 		if (callbackReceiver != null)
 		{
-			callbackReceiver.onParsingComplete(books, status);
+			callbackReceiver.onParsingComplete(page, status);
 		}
 	}
 }

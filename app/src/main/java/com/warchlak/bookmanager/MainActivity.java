@@ -3,6 +3,8 @@ package com.warchlak.bookmanager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -16,26 +18,31 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.warchlak.bookmanager.entity.Book;
+import com.warchlak.bookmanager.entity.Page;
 import com.warchlak.bookmanager.util.BookRestApiUriHolder;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements JsonDataParser.ParsingCompleteListener
+public class MainActivity extends AppCompatActivity implements JsonDataParser.ParsingCompleteListener, BottomNavigationView
+		.OnNavigationItemSelectedListener
 {
 	private static final String TAG = "MainActivity";
 	public static final String TAGS_TO_SEARCH = "query_tags";
 	public static final String SEARCH_REQUESTED = "search_requested";
+	
 	int pageSize;
+	int pagesTotal;
 	int pageNumber = 0;
 	String lookupMethod;
 	boolean usesAnyLookup;
 	private String lastUsedUri;
+	
 	private BookViewRecyclerAdapter recyclerAdapter = new BookViewRecyclerAdapter();
 	private RecyclerView recyclerView;
 	private TextView emptyResultTextView;
+	private BottomNavigationView navigationView;
+	MenuItem pageStatusItem;
 	
 	JsonDataParser jsonDataParser;
 	
@@ -51,6 +58,10 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+		
+		navigationView = findViewById(R.id.navigationBar);
+		navigationView.setOnNavigationItemSelectedListener(this);
+		pageStatusItem = navigationView.getMenu().findItem(R.id.menuPageState);
 		
 		recyclerView = findViewById(R.id.booksRecyclerView);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -71,10 +82,10 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 	}
 	
 	@Override
-	public void onParsingComplete(List<Book> parsedData, JsonDataParser.ParsingStatus status)
+	public void onParsingComplete(Page parsedData, JsonDataParser.ParsingStatus status)
 	{
-		Log.d(TAG, "onParsingComplete: parsed data contains: " + parsedData.size() + " books");
-		if (parsedData == null || parsedData.size() <= 0)
+		Log.d(TAG, "onParsingComplete: parsed data contains: " + parsedData.getBooksList().size() + " books");
+		if (parsedData.getBooksList().size() <= 0)
 		{
 			Log.d(TAG, "onParsingComplete: showing empty warning");
 			recyclerView.setVisibility(View.GONE);
@@ -84,7 +95,8 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		{
 			emptyResultTextView.setVisibility(View.GONE);
 			recyclerView.setVisibility(View.VISIBLE);
-			recyclerAdapter.changeDataSet(parsedData);
+			
+			recyclerAdapter.changeDataSet(parsedData.getBooksList());
 		}
 		else
 		{
@@ -101,7 +113,26 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 			View rootView = findViewById(R.id.mainRootLayout);
 			Snackbar.make(rootView, errorMessage, Snackbar.LENGTH_INDEFINITE).show();
 		}
+		
+		pageNumber = parsedData.getPageNumber() + 1;
+		pagesTotal = parsedData.getMaximumNumberOfPages();
+		refreshPageNumber();
 	}
+	
+	private void refreshPageNumber()
+	{
+		String pageStateIndicator = getString(R.string.page_state_indicator);
+		pageStateIndicator = String.format(pageStateIndicator, pageNumber, pagesTotal);
+		pageStatusItem.setTitle(pageStateIndicator);
+	}
+	
+	private void downloadNewPage()
+	{
+		URI uri = BookRestApiUriHolder.getPage(pageNumber);
+		jsonDataParser.setUri(uri);
+		jsonDataParser.start();
+	}
+	
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -160,6 +191,50 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 				{
 					Log.e(TAG, "onOptionsItemSelected: cannot refres data, URI: " + BookRestApiUriHolder.lastUsedUri + " is invalid");
 				}
+				return true;
+			
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	@Override
+	public boolean onNavigationItemSelected(@NonNull MenuItem item)
+	{
+		int id = item.getItemId();
+		
+		switch (id)
+		{
+			case R.id.menuPagePrev:
+				Log.d(TAG, "onNavigationItemSelected: previous page requested");
+				if ((pageNumber - 1) < 0)
+				{
+					pageNumber++;
+					refreshPageNumber();
+					downloadNewPage();
+				}
+				else
+				{
+					Toast.makeText(this, R.string.pageOutOfRangeRequested, Toast.LENGTH_SHORT).show();
+				}
+				return true;
+			
+			case R.id.menuPageNext:
+				Log.d(TAG, "onNavigationItemSelected: next page requested");
+				if ((pageNumber + 1) < pagesTotal)
+				{
+					pageNumber++;
+					refreshPageNumber();
+					downloadNewPage();
+				}
+				else
+				{
+					Toast.makeText(this, R.string.pageOutOfRangeRequested, Toast.LENGTH_SHORT).show();
+				}
+				return true;
+			
+			case R.id.menuPageState:
+				Log.d(TAG, "onNavigationItemSelected: page state clicked");
 				return true;
 			
 			default:

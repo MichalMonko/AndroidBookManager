@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Set;
 
 public class BookRestApiUriHolder
 {
@@ -16,6 +17,7 @@ public class BookRestApiUriHolder
 	public static final String DEFAULT_URI_STRING = "http://192.168.1.234:8081/api/book/?pageNumber=0&pageSize=10&lookupMethod=all";
 	
 	public static String lastUsedUri = DEFAULT_URI_STRING;
+	private static final String QUERY_PAGE_NUMBER = "pageNumber";
 	
 	public static Uri buildPhotoUri(String imageName)
 	{
@@ -29,6 +31,43 @@ public class BookRestApiUriHolder
 		Log.d(TAG, "buildPhotoUri: returning URI: " + uri.toString());
 		
 		return uri;
+	}
+	
+	public static URI getPage(int pageNumber)
+	{
+		Log.d(TAG, "getPage: starts");
+		
+		Uri lastUri = Uri.parse(lastUsedUri);
+		final Set<String> params = lastUri.getQueryParameterNames();
+		Uri.Builder uriBuilder = lastUri.buildUpon().clearQuery();
+		
+		for (String param : params)
+		{
+			if (param.equals(QUERY_PAGE_NUMBER))
+			{
+				uriBuilder.appendQueryParameter(param, String.valueOf(pageNumber));
+			}
+			else
+			{
+				uriBuilder.appendQueryParameter(param, lastUri.getQueryParameter(param));
+			}
+		}
+		
+		Uri buildedUri = uriBuilder.build();
+		try
+		{
+			URI uri = new URI(buildedUri.toString());
+			lastUsedUri = buildedUri.toString();
+			
+			Log.d(TAG, "getPage: returning URI: " + lastUsedUri);
+			
+			return uri;
+			
+		} catch (URISyntaxException e)
+		{
+			Log.e(TAG, "getPage: error creating uri for new page, uri is: " + buildedUri.toString());
+			return null;
+		}
 	}
 	
 	public static class TagSearchMethod
