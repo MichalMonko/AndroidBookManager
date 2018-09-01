@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 	private BookViewRecyclerAdapter recyclerAdapter = new BookViewRecyclerAdapter();
 	private RecyclerView recyclerView;
 	private TextView emptyResultTextView;
-	private BottomNavigationView navigationView;
 	MenuItem pageStatusItem;
 	
 	JsonDataParser jsonDataParser;
@@ -56,10 +55,10 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		applyUserPreferences();
 		
 		setContentView(R.layout.activity_main);
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		
-		navigationView = findViewById(R.id.navigationBar);
+		BottomNavigationView navigationView = findViewById(R.id.navigationBar);
 		navigationView.setOnNavigationItemSelectedListener(this);
 		pageStatusItem = navigationView.getMenu().findItem(R.id.menuPageState);
 		
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 			Snackbar.make(rootView, errorMessage, Snackbar.LENGTH_INDEFINITE).show();
 		}
 		
-		pageNumber = parsedData.getPageNumber() + 1;
+		pageNumber = parsedData.getPageNumber();
 		pagesTotal = parsedData.getMaximumNumberOfPages();
 		refreshPageNumber();
 	}
@@ -122,12 +121,13 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 	private void refreshPageNumber()
 	{
 		String pageStateIndicator = getString(R.string.page_state_indicator);
-		pageStateIndicator = String.format(pageStateIndicator, pageNumber, pagesTotal);
+		pageStateIndicator = String.format(pageStateIndicator, pageNumber + 1, pagesTotal);
 		pageStatusItem.setTitle(pageStateIndicator);
 	}
 	
 	private void downloadNewPage()
 	{
+		Log.d(TAG, "downloadNewPage: Downloading page: " + pageNumber);
 		URI uri = BookRestApiUriHolder.getPage(pageNumber);
 		jsonDataParser.setUri(uri);
 		jsonDataParser.start();
@@ -169,12 +169,15 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 			
 			case R.id.menuHomePage:
 				SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
-				sharedPreferences.edit().putString(LAST_URI_KEY, BookRestApiUriHolder.DEFAULT_URI_STRING).apply();
-				BookRestApiUriHolder.lastUsedUri = BookRestApiUriHolder.DEFAULT_URI_STRING;
+				
+				String defaultUri = BookRestApiUriHolder.getDefaultWithCustomParameters(pageSize);
+				
+				sharedPreferences.edit().putString(LAST_URI_KEY, defaultUri).apply();
+				BookRestApiUriHolder.lastUsedUri = defaultUri;
 				
 				try
 				{
-					jsonDataParser.setUri(new URI(BookRestApiUriHolder.DEFAULT_URI_STRING));
+					jsonDataParser.setUri(new URI(defaultUri));
 					jsonDataParser.start();
 				} catch (URISyntaxException e)
 				{
@@ -189,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 					jsonDataParser.start();
 				} catch (URISyntaxException e)
 				{
-					Log.e(TAG, "onOptionsItemSelected: cannot refres data, URI: " + BookRestApiUriHolder.lastUsedUri + " is invalid");
+					Log.e(TAG, "onOptionsItemSelected: cannot refresh data, URI: " + BookRestApiUriHolder.lastUsedUri + " is invalid");
 				}
 				return true;
 			
@@ -206,10 +209,10 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		switch (id)
 		{
 			case R.id.menuPagePrev:
-				Log.d(TAG, "onNavigationItemSelected: previous page requested");
-				if ((pageNumber - 1) < 0)
+				Log.d(TAG, "onNavigationItemSelected: previous page requested. current page number is: " + pageNumber);
+				if (pageNumber > 0)
 				{
-					pageNumber++;
+					pageNumber--;
 					refreshPageNumber();
 					downloadNewPage();
 				}
@@ -220,8 +223,8 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 				return true;
 			
 			case R.id.menuPageNext:
-				Log.d(TAG, "onNavigationItemSelected: next page requested");
-				if ((pageNumber + 1) < pagesTotal)
+				Log.d(TAG, "onNavigationItemSelected: next page requested, current page number is: " + pageNumber);
+				if (pageNumber + 1 < pagesTotal)
 				{
 					pageNumber++;
 					refreshPageNumber();
@@ -265,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 				query = query.trim();
 			}
 			
+			pageNumber = 0;
 			URI uri = BookRestApiUriHolder.buildPageUri(pageNumber, pageSize, query, lookupMethod);
 			jsonDataParser.setUri(uri);
 			jsonDataParser.start();
@@ -317,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements JsonDataParser.Pa
 		}
 		
 		lastUsedUri = sharedPreferences.getString(LAST_URI_KEY,
-				BookRestApiUriHolder.DEFAULT_URI_STRING);
+				BookRestApiUriHolder.getDefaultWithCustomParameters(pageSize));
 		
 		Log.d(TAG, "applyUserPreferences: pageSize: " + pageSize +
 				"\nusesAnyLookup: " + usesAnyLookup +

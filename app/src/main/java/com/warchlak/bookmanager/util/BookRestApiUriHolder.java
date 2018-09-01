@@ -12,9 +12,9 @@ public class BookRestApiUriHolder
 	private static final String TAG = "BookRestApiUriHolder";
 	
 	public static final String BASE_BOOK_URL = "http://192.168.1.234:8081/api/book/";
-	public static final String BASE_IMAGE_URL = "http://192.168.1.234:8081/api/images/";
-	public static final String FILE_PARAM_NAME = "file";
-	public static final String DEFAULT_URI_STRING = "http://192.168.1.234:8081/api/book/?pageNumber=0&pageSize=10&lookupMethod=all";
+	private static final String BASE_IMAGE_URL = "http://192.168.1.234:8081/api/images/";
+	private static final String FILE_PARAM_NAME = "file";
+	private static String DEFAULT_URI_STRING = "http://192.168.1.234:8081/api/book/";
 	
 	public static String lastUsedUri = DEFAULT_URI_STRING;
 	private static final String QUERY_PAGE_NUMBER = "pageNumber";
@@ -70,6 +70,19 @@ public class BookRestApiUriHolder
 		}
 	}
 	
+	public static String getDefaultWithCustomParameters(int pageSize)
+	{
+		Uri uri = Uri.parse(DEFAULT_URI_STRING)
+		             .buildUpon().appendQueryParameter("pageSize", String.valueOf(pageSize))
+		             .appendQueryParameter("pageNumber", String.valueOf(0))
+		             .build();
+		
+		lastUsedUri = uri.toString();
+		
+		return uri.toString();
+		
+	}
+	
 	public static class TagSearchMethod
 	{
 		public static final String ANY = "any";
@@ -80,7 +93,7 @@ public class BookRestApiUriHolder
 	{
 		Log.d(TAG, "buildPageUri: start");
 		
-		URI netUri = null;
+		URI netUri;
 		Uri uri = null;
 		
 		Uri.Builder builder = Uri.parse(BASE_BOOK_URL)
